@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>دور التكنولوجيا الحديثة والذكاء الاصطناعي في تطوير الرعاية الصحية</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;800;900&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#d4e4df;--card:#f6faf9;--ink:#12303a;--mut:#41606a;--line:rgba(18,48,58,.12);--cur:#0d9488;color-scheme:light;
+  --ecg:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='36' viewBox='0 0 120 36'%3E%3Cpath d='M0 18h34l6-11 8 24 7-13h10l5-5 5 5h45' fill='none' stroke='black' stroke-width='2.5' stroke-linejoin='round'/%3E%3C/svg%3E")}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:var(--bg);color:var(--ink);font-family:'Cairo','Segoe UI',Tahoma,sans-serif;overflow:hidden}
+.deck{position:relative;height:100%;width:100%}
+
+/* bubbles + ECG strip */
+.bubs{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+.bubs i{position:absolute;bottom:-120px;border-radius:50%;opacity:.16;animation:floatup linear infinite}
+@keyframes floatup{to{transform:translateY(-115vh) scale(1.3)}}
+.ecg{position:fixed;top:6px;left:0;right:0;height:36px;z-index:6;pointer-events:none;background:var(--cur);opacity:.45;transition:background .6s;
+  -webkit-mask:var(--ecg) repeat-x 0 0/120px 36px;mask:var(--ecg) repeat-x 0 0/120px 36px;animation:ecgmove 4s linear infinite}
+@keyframes ecgmove{to{-webkit-mask-position:-240px 0;mask-position:-240px 0}}
+#prog{position:fixed;top:0;right:0;height:5px;width:0;background:var(--cur);z-index:20;transition:width .5s,background .5s;border-radius:0 0 0 4px}
+
+/* slides: iris reveal */
+.slide{position:absolute;inset:0;z-index:1;padding:52px clamp(18px,4vw,64px) 100px;display:flex;overflow-y:auto;visibility:hidden;clip-path:circle(0% at 50% 55%);
+  background-color:var(--bg);background-image:radial-gradient(900px 500px at 90% 0%,color-mix(in srgb,var(--accent,#0d9488) 15%,transparent),transparent 65%),url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48'%3E%3Cpath d='M24 19v10M19 24h10' stroke='%230d9488' stroke-opacity='.2' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E")}
+.slide.active{visibility:visible;clip-path:circle(150% at 50% 55%);z-index:3;transition:clip-path .95s cubic-bezier(.7,0,.2,1)}
+.slide.leaving{visibility:visible;clip-path:circle(150% at 50% 55%);z-index:2}
+.cover{--accent:#0d9488}.qs{--accent:#0d9488}.st1{--accent:#2563eb}.st2{--accent:#e11d48}.st3{--accent:#059669}.st4{--accent:#7c3aed}.cl{--accent:#d97706}
+
+/* layout: side panel + main */
+.layout{width:100%;max-width:1280px;margin:auto;display:grid;grid-template-columns:minmax(220px,290px) 1fr;gap:clamp(14px,2vw,28px);align-items:stretch}
+.side{position:relative;overflow:hidden;border-radius:34px;padding:clamp(22px,2.6vw,34px);color:#fff;display:flex;flex-direction:column;justify-content:space-between;gap:18px;min-height:0;
+  background:var(--accent);background:linear-gradient(165deg,var(--accent),color-mix(in srgb,var(--accent) 55%,#0a1c26));box-shadow:0 30px 60px -28px var(--accent)}
+.side::after{content:"";position:absolute;inset:auto 0 0 0;height:36px;background:#fff;opacity:.28;-webkit-mask:var(--ecg) repeat-x 0 0/120px 36px;mask:var(--ecg) repeat-x 0 0/120px 36px;animation:ecgmove 5s linear infinite}
+.num{font-size:clamp(80px,min(11vw,20vh),150px);font-weight:900;line-height:.85;opacity:.28;letter-spacing:-4px}
+.who h2{font-size:clamp(24px,2.5vw,36px);font-weight:900;line-height:1.35}
+.axis{margin-top:8px;font-weight:700;font-size:clamp(14px,1.4vw,18px);line-height:1.6;opacity:.95}
+.big{position:absolute;top:22px;left:22px;font-size:clamp(44px,5vw,66px);animation:float 4s ease-in-out infinite;filter:drop-shadow(0 8px 14px rgba(0,0,0,.25))}
+@keyframes float{50%{transform:translateY(-9px) rotate(-6deg)}}
+.main{display:flex;flex-direction:column;gap:clamp(14px,2vw,22px);justify-content:center;min-width:0}
+@keyframes sideIn{from{opacity:0;transform:translateX(70px)}}
+@keyframes rise{from{opacity:0;transform:translateY(30px)}}
+.slide.active .side{animation:sideIn .8s .35s backwards cubic-bezier(.2,.8,.2,1)}
+.slide.active .card,.slide.active .source,.slide.active .qcard{animation:rise .7s backwards}
+.slide.active .card:nth-child(1),.slide.active .qcard{animation-delay:.55s}.slide.active .card:nth-child(2){animation-delay:.7s}.slide.active .card:nth-child(3){animation-delay:.85s}.slide.active .source{animation-delay:1s}
+
+/* cards */
+.body{display:grid;grid-template-columns:1fr 1fr;gap:clamp(12px,1.8vw,20px);align-content:start}
+.body.three{grid-template-columns:1fr}
+.card{position:relative;cursor:pointer;background:var(--card);border-radius:22px;padding:clamp(14px,min(1.8vw,2.7vh),24px);border-inline-start:7px solid var(--accent);box-shadow:0 14px 34px -22px rgba(18,48,58,.5);
+  transition:transform .3s,box-shadow .3s,background .3s,color .3s,opacity .3s;-webkit-tap-highlight-color:transparent}
+.card.wide{grid-column:1/-1}
+.card h3{display:flex;align-items:center;gap:12px;font-size:clamp(16px,min(1.7vw,3.1vh),22px);font-weight:900;color:var(--accent);margin-bottom:8px;transition:color .3s}
+.card p,.card li{font-size:clamp(13px,min(1.3vw,2.4vh),17px);line-height:1.85;color:var(--mut);transition:color .3s}
+.card ul{padding-inline-start:22px;display:grid;gap:4px}
+.ic{background:#dbe9e8;display:inline-grid;place-items:center;width:1.9em;height:1.9em;flex:none;font-size:1.05em;border-radius:14px;background:color-mix(in srgb,var(--accent) 14%,#fff);transition:transform .3s,background .3s}
+.card:hover{transform:translateY(-6px);box-shadow:0 26px 44px -22px color-mix(in srgb,var(--accent) 60%,transparent)}
+.card:hover .ic{transform:scale(1.2) rotate(-8deg)}
+.card:active{transform:scale(.985)}
+.card.sel{background:var(--accent);transform:scale(1.015)}
+.card.sel h3,.card.sel p,.card.sel li,.card.sel b{color:#fff}
+.card.sel p,.card.sel li{font-weight:700}
+.card.sel .ic{background:rgba(255,255,255,.22)}
+.body.has-sel .card:not(.sel){opacity:.4}
+.stat{display:flex;align-items:center;gap:clamp(14px,2.4vw,30px)}
+.stat b{font-size:clamp(46px,7.5vw,100px);font-weight:900;color:var(--accent);line-height:1;white-space:nowrap;font-variant-numeric:tabular-nums;transition:color .3s}
+.stat>div{flex:1}
+.meter{height:16px;background:color-mix(in srgb,var(--accent) 14%,#fff);border-radius:10px;margin-top:14px;overflow:hidden}
+.meter i{display:block;height:100%;width:0;border-radius:10px;background:linear-gradient(90deg,var(--accent),color-mix(in srgb,var(--accent) 55%,#fff));transition:width 1.4s .5s cubic-bezier(.2,.8,.2,1)}
+.slide.active .meter i{width:var(--w)}
+.card.sel .meter{background:rgba(255,255,255,.28)}.card.sel .meter i{background:#fff}
+.source{display:flex;gap:14px;align-items:center;cursor:pointer;border-radius:18px;padding:clamp(10px,2vh,15px) 20px;font-size:clamp(12px,min(1.2vw,2.2vh),16px);line-height:1.7;color:var(--mut);transition:.3s;
+  background:#f2f8f7;background:color-mix(in srgb,var(--accent) 9%,#fff);border:1.5px dashed color-mix(in srgb,var(--accent) 55%,transparent)}
+.source::before{content:"📖";font-size:1.5em}
+.source strong{color:var(--accent);white-space:nowrap}
+.source:hover,.source.sel{background:var(--accent);color:#fff;border-style:solid}
+.source:hover strong,.source.sel strong{color:#fff}
+.ai{background:color-mix(in srgb,var(--accent) 7%,#fff);border-inline-start-style:dashed}
+
+/* question */
+.qcard{position:relative;border-radius:28px;padding:clamp(20px,min(2.8vw,4vh),38px);color:#fff;font-size:clamp(17px,min(2vw,3.6vh),27px);font-weight:800;line-height:1.9;background:var(--accent);background:linear-gradient(150deg,var(--accent),color-mix(in srgb,var(--accent) 50%,#0a1c26));box-shadow:0 30px 60px -30px var(--accent)}
+.qcard::before{content:"❝";position:absolute;top:-4px;right:22px;font-size:76px;line-height:1;opacity:.35}
+.abstract{line-height:1.9}
+
+/* cover */
+.cover .layout{grid-template-columns:1.15fr .85fr;align-items:center;gap:clamp(20px,3vw,48px)}
+.cover .txt{display:flex;flex-direction:column;gap:clamp(12px,2vh,20px)}
+.kicker{display:inline-flex;align-items:center;gap:10px;align-self:flex-start;background:var(--card);border-radius:999px;padding:8px 18px;font-weight:800;font-size:clamp(13px,1.3vw,16px);color:var(--accent);box-shadow:0 10px 24px -14px rgba(18,48,58,.5)}
+.kicker i{width:10px;height:10px;border-radius:50%;background:#e11d48;animation:blink 1.2s infinite}
+@keyframes blink{50%{opacity:.2}}
+.cover h1{font-size:clamp(28px,4.6vw,60px);font-weight:900;line-height:1.35;color:var(--ink)}
+.cover h1 em{font-style:normal;background:linear-gradient(90deg,#0d9488,#2563eb,#e11d48,#0d9488);background-size:300% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:shine 8s linear infinite}
+@keyframes shine{to{background-position:-300% 0}}
+.sub{color:var(--mut);font-size:clamp(16px,2vw,24px);font-weight:700}
+.hint{color:var(--mut);font-size:clamp(12px,1.2vw,15px)}
+.team{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.team button{display:flex;align-items:center;gap:12px;font-family:inherit;font-weight:800;font-size:clamp(13px,1.35vw,17px);color:var(--ink);background:var(--card);border:0;border-radius:20px;padding:12px 16px;cursor:pointer;text-align:start;
+  border-inline-start:6px solid var(--c);box-shadow:0 12px 28px -18px rgba(18,48,58,.55);transition:.25s}
+.team button b{flex:none;width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:var(--c);color:#fff;font-size:15px}
+.team button:hover{background:var(--c);color:#fff;transform:translateY(-5px) scale(1.02)}
+.team button:hover b{background:#fff;color:var(--c)}
+.visual{position:relative;justify-self:center;width:min(100%,400px);aspect-ratio:1}
+.visual .heart{position:absolute;inset:16%;animation:beat 1.3s ease-in-out infinite;filter:drop-shadow(0 24px 30px rgba(225,29,72,.35))}
+@keyframes beat{0%,100%{transform:scale(1)}14%{transform:scale(1.1)}28%{transform:scale(1)}42%{transform:scale(1.07)}}
+.visual .line{stroke-dasharray:300;stroke-dashoffset:300;animation:draw 2.6s linear infinite}
+@keyframes draw{60%{stroke-dashoffset:0}100%{stroke-dashoffset:-300}}
+.ring{position:absolute;inset:0;border:2px dashed color-mix(in srgb,var(--accent) 45%,transparent);border-radius:50%;animation:spin 24s linear infinite}
+.ring.r2{inset:9%;animation-direction:reverse;animation-duration:30s;border-color:rgba(225,29,72,.35)}
+@keyframes spin{to{transform:rotate(360deg)}}
+.ring span{position:absolute;top:0;left:50%;font-size:clamp(24px,3vw,38px);transform:translate(-50%,-50%);background:var(--card);border-radius:50%;width:1.7em;height:1.7em;display:grid;place-items:center;box-shadow:0 10px 20px -8px rgba(18,48,58,.5)}
+.ring span:nth-child(2){top:50%;left:100%}.ring span:nth-child(3){top:100%}.ring span:nth-child(4){top:50%;left:0}
+
+/* dock + rail */
+.dock{position:fixed;left:22px;bottom:22px;z-index:10;direction:ltr;display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:22px;background:rgba(246,250,249,.94);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);box-shadow:0 20px 44px -18px rgba(18,48,58,.6)}
+.pair{display:flex;gap:6px}
+.dock button{font:700 14px 'Segoe UI',Tahoma,sans-serif;letter-spacing:.4px;cursor:pointer;background:#dbe9e5;color:var(--ink);border:0;border-radius:14px;padding:0 16px;height:42px;white-space:nowrap;transition:.2s}
+.dock button:hover{background:var(--cur);color:#fff}
+.dock button:active{transform:scale(.93)}
+.dock button:disabled{opacity:.35;cursor:not-allowed;background:#dbe9e5;color:var(--ink)}
+.dock #next{background:var(--cur);color:#fff}
+.dock #next:hover{filter:brightness(1.1)}
+#count{min-width:54px;text-align:center;font-weight:800;color:var(--cur);font-size:16px}
+.rail{position:fixed;right:14px;top:50%;transform:translateY(-50%);z-index:10;display:flex;flex-direction:column;gap:10px}
+.rail button{width:12px;height:12px;border-radius:8px;border:0;background:rgba(18,48,58,.22);cursor:pointer;transition:.3s}
+.rail button.on{height:34px;background:var(--cur)}
+.rail button:hover{background:var(--cur)}
+.credit{position:fixed;right:22px;bottom:12px;z-index:10;font-size:clamp(10px,1vw,13px);color:var(--mut);pointer-events:none;font-family:'Segoe UI',Tahoma,sans-serif;white-space:nowrap}
+.credit strong{color:var(--cur)}
+button:focus-visible{outline:3px solid var(--cur);outline-offset:2px}
+.burst{position:fixed;bottom:-40px;font-size:30px;z-index:30;pointer-events:none;animation:fly 2.4s ease-out forwards}
+@keyframes fly{to{transform:translate(var(--x),-105vh) rotate(540deg);opacity:0}}
+@media(max-width:1000px){.rail{display:none}}
+@media(max-width:860px){
+  .layout,.cover .layout{grid-template-columns:1fr}.side{min-height:0;flex-direction:row;align-items:center;flex-wrap:wrap}.num{font-size:64px;opacity:.4}.big{position:static;font-size:44px}.who{flex:1;min-width:60%}
+  .body{grid-template-columns:1fr}.stat{flex-direction:column;align-items:flex-start}.visual{display:none}.team{grid-template-columns:1fr}
+  .slide{padding-bottom:128px}
+  .dock{left:8px;right:8px;bottom:22px;justify-content:space-between;gap:4px;padding:6px}.dock button{padding:0 9px;font-size:12px;height:38px}#count{min-width:40px;font-size:12px}
+  .credit{right:0;left:0;text-align:center;bottom:4px}
+}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div id="prog"></div><div class="ecg"></div>
+<div class="bubs" id="bubs"></div>
+<main class="deck">
+
+<!-- 0: Cover -->
+<section class="slide cover active">
+  <div class="layout">
+    <div class="txt">
+      <span class="kicker"><i></i>بحث جماعي · الصحة الرقمية</span>
+      <h1>دور <em>التكنولوجيا الحديثة</em> والذكاء الاصطناعي في تطوير الرعاية الصحية</h1>
+      <div class="sub">الفرص والتحديات</div>
+      <div class="hint">اضغط على اسمك للانتقال لصفحتك مباشرة</div>
+      <div class="team">
+        <button data-go="2" style="--c:#2563eb"><b>1</b>مصطفى محمد عبدالجليل</button>
+        <button data-go="3" style="--c:#e11d48"><b>2</b>مروان رفيق</button>
+        <button data-go="4" style="--c:#059669"><b>3</b>هاني عاطف</button>
+        <button data-go="5" style="--c:#7c3aed"><b>4</b>محمود عماد</button>
+      </div>
+    </div>
+    <div class="visual">
+      <div class="ring"><span>💊</span><span>🧬</span><span>🩺</span><span>🔬</span></div>
+      <div class="ring r2"></div>
+      <svg class="heart" viewBox="0 0 120 110"><path d="M60 100C8 62 4 32 22 17 37 4 54 10 60 26 66 10 83 4 98 17c18 15 14 45-38 83z" fill="#e11d48"/><path class="line" d="M10 56H42L50 38 62 76 70 52H110" fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </div>
+  </div>
+</section>
+
+<!-- 1: Question + abstract -->
+<section class="slide qs">
+  <div class="layout">
+    <aside class="side"><span class="num">؟</span><div class="who"><h2>السؤال الرئيسي للمشروع</h2><div class="axis">محور البحث وملخصه</div></div><span class="big">🩺</span></aside>
+    <div class="main">
+      <div class="qcard">ما مدى فعالية التكنولوجيا الحديثة وتطبيقات الذكاء الاصطناعي في تحسين دقة التشخيص وجودة الرعاية الصحية وإتاحتها لجميع المرضى، وما أبرز التحديات الأخلاقية والقانونية والاقتصادية التي تواجه تطبيقها؟</div>
+      <div class="body"><div class="card wide"><h3><span class="ic">📘</span>ملخص البحث</h3><p class="abstract">يشهد القطاع الصحي تحولاً رقمياً متسارعاً بفضل الذكاء الاصطناعي والأجهزة القابلة للارتداء والطب عن بُعد والروبوتات الجراحية. يهدف هذا البحث إلى دراسة دور هذه التقنيات في الكشف المبكر عن الأمراض وتحسين الوصول إلى الرعاية، ومقارنتها بالنظام الصحي التقليدي، مع تحليل التحديات المتعلقة بخصوصية بيانات المرضى والعدالة والتكلفة.</p></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- 2: Student 1 -->
+<section class="slide st1">
+  <div class="layout">
+    <aside class="side"><span class="num">1</span><div class="who"><h2>مصطفى محمد عبدالجليل</h2><div class="axis">التطور التقني وحدود القدرات في الطب</div></div><span class="big">🧬</span></aside>
+    <div class="main">
+      <div class="body">
+        <div class="card wide"><h3><span class="ic">🧬</span>الشرح التقني</h3><p>تعتمد الرعاية الصحية الحديثة على تقنيات التعلم الآلي والرؤية الحاسوبية لتحليل الصور الطبية، مثل الأشعة والتصوير المقطعي وصور شبكية العين، لمساعدة الأطباء على اكتشاف الأمراض في مراحلها المبكرة. كما تعتمد على الأجهزة القابلة للارتداء (Wearables) التي ترصد نبض القلب ومستوى الأكسجين وتنبه المريض أو طبيبه عند حدوث تغيرات غير طبيعية، إلى جانب السجلات الصحية الإلكترونية التي تجمع بيانات المريض في مكان واحد.</p></div>
+        <div class="card wide"><h3><span class="ic">⚠️</span>حدود القدرات التقنية</h3><p>رغم دقتها العالية في مهام محددة، لا تحل هذه الأنظمة محل حكم الطبيب؛ فهي تفتقر إلى التعاطف والفهم الإنساني لحالة المريض، وتعتمد على جودة البيانات التي تدربت عليها، ويصعب أحياناً تفسير سبب قرارها (مشكلة «الصندوق الأسود»)، وقد تخطئ في الحالات النادرة أو غير المألوفة، لذلك تبقى القرارات النهائية بيد الطبيب.</p></div>
+      </div>
+      <div class="source"><strong>المصدر الموثق:</strong><span>كتاب «Deep Medicine: How Artificial Intelligence Can Make Healthcare Human Again» للدكتور إريك توبول (Eric Topol, 2019)، والذي يناقش كيف يمكن للذكاء الاصطناعي تعزيز دقة التشخيص ومنح الأطباء وقتاً أكبر للتواصل مع المرضى.</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- 3: Student 2 -->
+<section class="slide st2">
+  <div class="layout">
+    <aside class="side"><span class="num">2</span><div class="who"><h2>مروان رفيق</h2><div class="axis">التطبيقات العملية ومقارنة استخدامها</div></div><span class="big">💻</span></aside>
+    <div class="main">
+      <div class="body">
+        <div class="card"><h3><span class="ic">💻</span>الطب عن بُعد (Telemedicine)</h3><p>استشارة الطبيب عبر مكالمة فيديو أو تطبيق على الهاتف دون الحاجة للسفر، وهو مفيد لسكان المناطق النائية وللمتابعة الدورية لمرضى الأمراض المزمنة.</p></div>
+        <div class="card"><h3><span class="ic">🦾</span>الجراحة بمساعدة الروبوت</h3><p>أنظمة روبوتية يتحكم فيها الجراح لإجراء عمليات دقيقة بشقوق صغيرة، مما يقلل الألم وفترة التعافي في كثير من الحالات.</p></div>
+        <div class="card wide stat"><b>50%</b><div><h3><span class="ic">⚖️</span>مقارنة واقعية</h3><p>في النظام التقليدي يعتمد المريض على الحضور الشخصي إلى العيادة أو المستشفى، وهو ما يصعب على سكان المناطق البعيدة أو محدودي الدخل. وتشير تقارير منظمة الصحة العالمية والبنك الدولي إلى أن نصف سكان العالم على الأقل لا يحصلون على الخدمات الصحية الأساسية كاملة، وتسهم الصحة الرقمية والطب عن بُعد في تقليل هذه الفجوة وتسريع الوصول إلى الرعاية.</p><div class="meter"><i style="--w:50%"></i></div></div></div>
+      </div>
+      <div class="source"><strong>المصدر الموثق:</strong><span>«الاستراتيجية العالمية للصحة الرقمية 2020–2025» الصادرة عن منظمة الصحة العالمية (WHO)، وتقرير «Tracking Universal Health Coverage» الصادر عن المنظمة والبنك الدولي (2017).</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- 4: Student 3 -->
+<section class="slide st3">
+  <div class="layout">
+    <aside class="side"><span class="num">3</span><div class="who"><h2>هاني عاطف</h2><div class="axis">الاقتصاد والمال والوظائف في القطاع الصحي</div></div><span class="big">💰</span></aside>
+    <div class="main">
+      <div class="body">
+        <div class="card wide"><h3><span class="ic">💰</span>التحليل المالي</h3><p>يتطلب تطبيق التكنولوجيا الصحية استثمارات أولية مرتفعة لشراء أجهزة التصوير والروبوتات الجراحية، وبناء أنظمة السجلات الإلكترونية، وتأمين بنية تحتية قوية للإنترنت، وهو ما يمثل عبئاً على المستشفيات الحكومية والدول النامية. إلا أن الكشف المبكر عن الأمراض وتقليل الزيارات والفحوصات المتكررة قد يخفض التكاليف على المدى الطويل ويحسن كفاءة استخدام الموارد.</p></div>
+        <div class="card wide"><h3><span class="ic">👨‍⚕️</span>تأثيرها على الوظائف</h3><p>لا تلغي التكنولوجيا دور الطبيب أو الممرض، بل تغير طبيعة عملهما؛ فهي تخفف عنهما المهام الروتينية والإدارية ليتفرغا لرعاية المرضى والتواصل معهم. وتظهر في المقابل وظائف جديدة مثل محللي البيانات الصحية ومتخصصي المعلوماتية الطبية وفنيي الأجهزة الذكية، مما يتطلب برامج تدريب مستمرة للكوادر الحالية.</p></div>
+      </div>
+      <div class="source"><strong>المصدر الموثق:</strong><span>تقارير منظمة التعاون الاقتصادي والتنمية (OECD) «نظرة على الصحة» (Health at a Glance).</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- 5: Student 4 -->
+<section class="slide st4">
+  <div class="layout">
+    <aside class="side"><span class="num">4</span><div class="who"><h2>محمود عماد</h2><div class="axis">التحيز، الخصوصية، والتشريعات</div></div><span class="big">🔒</span></aside>
+    <div class="main">
+      <div class="body three">
+        <div class="card"><h3><span class="ic">🔒</span>خصوصية بيانات المرضى</h3><p>تجمع التطبيقات والأجهزة الذكية بيانات شديدة الحساسية عن صحة المريض وتاريخه الطبي، مما يعرضها لخطر الاختراق أو الاستخدام التجاري دون إذن المريض، وقد يضر تسريبها بسمعته وحقوقه.</p></div>
+        <div class="card"><h3><span class="ic">🧭</span>التحيز الخوارزمي</h3><p>إذا تدربت الخوارزميات على بيانات مرضى من فئات أو دول محددة فقط، فقد تقل دقتها عند تطبيقها على فئات أخرى مختلفة في العمر أو لون البشرة أو البيئة، مما قد يؤدي إلى تشخيص غير عادل أو خاطئ.</p></div>
+        <div class="card"><h3><span class="ic">📜</span>المبدأ التنظيمي</h3><p>تتطلب البيئة الصحية الرقمية تشريعات واضحة تحمي بيانات المرضى، وتحدد المسؤولية القانونية عند حدوث خطأ تقني، وتضمن بقاء الطبيب صاحب القرار النهائي في تشخيص المريض وعلاجه.</p></div>
+      </div>
+      <div class="source"><strong>المصدر الموثق:</strong><span>تقرير «أخلاقيات وحوكمة الذكاء الاصطناعي في الصحة» الصادر عن منظمة الصحة العالمية (WHO, 2021).</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- 6: Conclusion -->
+<section class="slide cl">
+  <div class="layout">
+    <aside class="side"><span class="num">★</span><div class="who"><h2>الاستنتاج والتوصيات</h2><div class="axis">الفريق بالكامل</div></div><span class="big">❤️</span></aside>
+    <div class="main">
+      <div class="body">
+        <div class="card wide"><h3><span class="ic">❤️</span>الاستنتاج</h3><p>توصل الفريق إلى أن التكنولوجيا والذكاء الاصطناعي أصبحا ركيزة أساسية في تطوير الرعاية الصحية الحديثة؛ فهما يسهمان في الكشف المبكر عن الأمراض وتحسين دقة التشخيص وتوسيع الوصول إلى الخدمات الطبية، خاصة في المناطق النائية. ومع ذلك تبقى هذه الأدوات مساندة للطبيب وليست بديلاً عنه، ويجب أن يرافق انتشارها حماية صارمة لخصوصية بيانات المرضى ومعالجة التحيز الخوارزمي وضمان العدالة في إتاحتها لجميع فئات المجتمع، حتى تتحقق الفائدة الكاملة منها.</p></div>
+        <div class="card"><h3><span class="ic">📊</span>أهم النتائج</h3><ul><li>الكشف المبكر ودقة التشخيص أبرز مكاسب الذكاء الاصطناعي في الطب.</li><li>الطب عن بُعد والصحة الرقمية يقللان الفجوة في الوصول إلى الرعاية.</li><li>التكلفة المرتفعة والخصوصية والتحيز أبرز التحديات المطلوب معالجتها.</li></ul></div>
+        <div class="card"><h3><span class="ic">✅</span>التوصيات</h3><ul><li>تدريب مستمر للأطباء والكوادر الطبية على استخدام الأدوات الرقمية بفعالية وأمان.</li><li>تشريعات صارمة تحمي خصوصية البيانات الصحية وتحدد المسؤولية القانونية.</li><li>توسيع الإنترنت والخدمات الصحية الرقمية في المناطق النائية لضمان وصول الرعاية للجميع.</li></ul></div>
+      </div>
+    </div>
+  </div>
+</section>
+</main>
+
+<div class="rail" id="rail"></div>
+<div class="dock">
+  <div class="pair"><button id="prev">← Back</button><button id="next">Next →</button></div>
+  <span id="count"></span>
+  <button id="home">Home</button>
+  <button id="fs">⛶ Fullscreen</button>
+</div>
+<div class="credit" dir="ltr">Designed &amp; developed by <strong>Mustafa Muhammad Abdul Jalil</strong></div>
+
+<script>
+const slides=[...document.querySelectorAll('.slide')],rail=document.getElementById('rail'),count=document.getElementById('count'),prog=document.getElementById('prog');
+const prevB=document.getElementById('prev'),nextB=document.getElementById('next'),homeB=document.getElementById('home');
+let i=0,first=true;
+slides.forEach((_,n)=>{const b=document.createElement('button');b.setAttribute('aria-label','Slide '+(n+1));b.onclick=()=>go(n);rail.appendChild(b)});
+document.querySelectorAll('.stat b').forEach(b=>b.dataset.t=b.textContent);
+function countUp(sl){
+  sl.querySelectorAll('.stat b').forEach(b=>{
+    const t=b.dataset.t,t0=performance.now()+500;
+    (function f(now){const k=Math.max(0,Math.min(1,(now-t0)/1100)),e=1-Math.pow(1-k,3);
+      b.textContent=t.replace(/\d+/g,m=>Math.round(+m*e));
+      if(k<1)requestAnimationFrame(f)})(performance.now());
+  });
+}
+function burst(){const em=['❤️','🩺','✨','💊','🧬'];for(let k=0;k<28;k++){const b=document.createElement('span');b.className='burst';b.textContent=em[k%5];
+  b.style.left=(10+Math.random()*80)+'%';b.style.setProperty('--x',(Math.random()*240-120)+'px');b.style.animationDelay=(Math.random()*.5+.6)+'s';
+  document.body.appendChild(b);setTimeout(()=>b.remove(),4200)}}
+function go(n){
+  const nn=Math.max(0,Math.min(slides.length-1,n));
+  if(!first&&nn===i)return;
+  const old=slides[i];
+  if(!first&&old){old.classList.add('leaving');setTimeout(()=>old.classList.remove('leaving'),1000)}
+  first=false;i=nn;
+  slides.forEach((s,k)=>{s.classList.toggle('active',k===i);if(k===i){s.scrollTop=0;s.classList.remove('leaving')}});
+  const sl=slides[i],c=getComputedStyle(sl).getPropertyValue('--accent').trim()||'#0d9488';
+  document.documentElement.style.setProperty('--cur',c);
+  [...rail.children].forEach((d,k)=>d.classList.toggle('on',k===i));
+  count.textContent=(i+1)+' / '+slides.length;
+  prog.style.width=((i+1)/slides.length*100)+'%';
+  prevB.disabled=homeB.disabled=i===0;nextB.disabled=i===slides.length-1;
+  document.querySelectorAll('.card.sel,.source.sel').forEach(x=>x.classList.remove('sel'));
+  document.querySelectorAll('.has-sel').forEach(x=>x.classList.remove('has-sel'));
+  countUp(sl);
+  if(i===slides.length-1)burst();
+  try{history.replaceState(null,'','#'+(i+1))}catch(e){}
+}
+document.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>go(+b.dataset.go));
+nextB.onclick=()=>go(i+1);prevB.onclick=()=>go(i-1);homeB.onclick=()=>go(0);
+document.getElementById('fs').onclick=()=>document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen();
+addEventListener('keydown',e=>{
+  if(['ArrowLeft','PageDown',' '].includes(e.key)){e.preventDefault();go(i+1)}
+  if(['ArrowRight','PageUp'].includes(e.key)){e.preventDefault();go(i-1)}
+  if(e.key==='Home')go(0);
+  if(e.key==='End')go(slides.length-1);
+});
+let x0=null;
+addEventListener('touchstart',e=>x0=e.touches[0].clientX,{passive:true});
+addEventListener('touchend',e=>{if(x0===null)return;const d=e.changedTouches[0].clientX-x0;if(Math.abs(d)>60)go(d<0?i+1:i-1);x0=null});
+document.querySelectorAll('.card,.source').forEach(c=>c.addEventListener('click',()=>{
+  const body=c.closest('.body'),on=!c.classList.contains('sel');
+  if(body){body.querySelectorAll('.card.sel').forEach(x=>x.classList.remove('sel'));body.classList.toggle('has-sel',on)}
+  c.classList.toggle('sel',on);
+}));
+/* soft floating bubbles */
+const bubs=document.getElementById('bubs'),cols=['#0d9488','#2563eb','#e11d48','#7c3aed','#059669'];
+for(let k=0;k<16;k++){const b=document.createElement('i'),s=30+Math.random()*90;
+  b.style.cssText='left:'+(Math.random()*98)+'%;width:'+s+'px;height:'+s+'px;background:'+cols[k%5]+';animation-duration:'+(18+Math.random()*22)+'s;animation-delay:-'+(Math.random()*30)+'s';bubs.appendChild(b)}
+go((parseInt(location.hash.slice(1))||1)-1);
+</script>
+</body>
+</html>
